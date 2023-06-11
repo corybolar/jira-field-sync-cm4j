@@ -12,15 +12,17 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--jira-base-url', type=str, required=True, help='Base URL of JIRA instance')
-parser.add_argument('--api-key', type=str, required=True, help='JIRA API Key')
-parser.add_argument('--field-id', type=str, required=True, help='Custom field id (CM4J)')
-parser.add_argument('--debug', action='store_true', help='Verbose logging')
-parser.add_argument('--silent', action='store_true', help='Silent logging')
+parser = argparse.ArgumentParser(
+    description="Synchronize a custom JIRA field with a list of options from file")
+parser.add_argument('--jira-base-url', '-u', type=str, required=True,
+                    help='Base URL of JIRA instance')
+parser.add_argument('--api-key', '-k', type=str, required=True, help='JIRA API Key')
+parser.add_argument('--field-id', '-f', type=str, required=True, help='Custom field id (CM4J)')
+parser.add_argument('--debug', '-v', action='store_true', help='Verbose logging')
+parser.add_argument('--silent', '-s', action='store_true', help='Silent logging')
 parser.add_argument('options', nargs='*',
                     help='Path to file(s) containing list of options')
-parser.add_argument('--project-slug', type=str, required=True, help='JIRA project slug')
+parser.add_argument('--project-slug', '-p', type=str, required=True, help='JIRA project slug')
 parser.add_argument('--static-options', nargs='+',
                     help="Static list of options to append to selection. Space delimited",
                     default='Other')
