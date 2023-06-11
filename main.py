@@ -18,11 +18,8 @@ parser.add_argument('--api-key', type=str, required=True, help='JIRA API Key')
 parser.add_argument('--field-id', type=str, required=True, help='Custom field id (CM4J)')
 parser.add_argument('--debug', action='store_true', help='Verbose logging')
 parser.add_argument('--silent', action='store_true', help='Silent logging')
-#parser.add_argument('--option-file-path', type=str, required=True,
-#                    help='Path to file containing list of options')
 parser.add_argument('options', nargs='*',
                     help='Path to file(s) containing list of options')
-
 parser.add_argument('--project-slug', type=str, required=True, help='JIRA project slug')
 parser.add_argument('--static-options', nargs='+',
                     help="Static list of options to append to selection. Space delimited",
@@ -178,7 +175,6 @@ def main():
 
     logger.debug("Current JIRA List: %s", current_options)
 
-
     option_list = read_input()
     jira_options = set(current_options)
     file_options = set(option_list)
@@ -213,7 +209,7 @@ def main():
     current_options_json = get_options()
 
     unsorted_opt_list = [opt for opt in current_options_json if opt['value'] not in static_opts]
-    sorted_opt_list = sorted(unsorted_opt_list, key=lambda opt: opt['value'])
+    sorted_opt_list = sorted(unsorted_opt_list, key=lambda opt: opt['value'].lower())
 
     logger.info("Sorted option list: %s", [opt['value'] for opt in sorted_opt_list])
 
@@ -228,4 +224,6 @@ def main():
     logger.info("Success")
 
 if __name__ == '__main__':
+    if args.dry_run:
+        logger.info("Running in dry-run mode. No changes will be made")
     main()
