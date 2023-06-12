@@ -87,13 +87,17 @@ def get_options() -> dict:
     res = response.json()
     return res['data'][0]['context']['values']
 
-def get_option_id(value: str):
-    """Retrieve id of field with name value"""
+def get_option(value: str):
+    """Retrieve field with name value"""
     option_list = get_options()
     for option in option_list:
         if option.get('value') == value:
-            return option.get('optionId')
+            return option
     return None
+
+def get_option_id(value: str):
+    """Retrieve id of field with name value"""
+    return get_option(value).get('optionId')
 
 def disable_option(option_id: str) -> dict:
     """Disable a field by id"""
@@ -174,13 +178,14 @@ def main():
     """Main function"""
     current_options_json = get_options()
     current_options = [x.get('value') for x in current_options_json]
+    current_options_enabled = [x.get('value') for x in current_options_json if not x['disabled']]
 
-    logger.debug("Current JIRA List: %s", current_options)
+    logger.info("Current options: %s", current_options)
 
     option_list = read_input()
-    jira_options = set(current_options)
+    jira_options = set(current_options_enabled)
     file_options = set(option_list)
-    logger.info("Existing JIRA options: %s", jira_options)
+    logger.info("Current enabled options: %s", jira_options)
     logger.info("New options: %s", file_options)
 
     missing = list(sorted(jira_options - file_options))
@@ -203,9 +208,11 @@ def main():
 
     # Enable all options in source of truth list
     for opt in option_list:
-        opt_id = get_option_id(opt)
-        logger.info("Enabling option: %s", {'name': opt, 'id': opt_id})
-        enable_option(opt_id)
+        opt_config = get_option(opt)
+        if opt_config and opt_config['disabled']:
+            # pylint: disable=line-too-long
+            logger.info("Enabling option: %s", {'name': opt_config['value'], 'id': opt_config['optionId']})
+            enable_option(opt_config['optionId'])
 
     # Reorder option list in JIRA alphabetically with static options appended to the end
     current_options_json = get_options()
